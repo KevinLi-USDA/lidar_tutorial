@@ -1,0 +1,88 @@
+---
+title: "Lidar Tutorial"
+output: html_notebook
+---
+
+This tutorial is an introduction to working with the products of lidar data collection from airborne platforms (e.g., drones) using the statistical software `R`, specifically the library `lidR`.
+
+*Language:* `R`
+
+*Packages:*
+
+| Name | Description | Link |
+|:--|:--|:--|
+| `lidR` | Package to view and process LiDAR point clouds in `R` | https://cran.r-project.org/web/packages/lidR/index.html |
+| `future` | Package to enable parallel processing for more efficient computation | https://cran.r-project.org/web/packages/future/index.html |
+
+## Nomenclature
+
+* *lidar:* Light Detection and Ranging, a method of remote sensing using pulsed lasers to measure distances.
+* *LAS:* A file format for storing the 3D point cloud data collected by LiDAR. A related file format is LAZ, which is the compressed version of LAS.
+* *Pulse:* A discrete "shot" of laser emission from the LiDAR platform that is used to measure distance from the target surface, which in turn are the basis of point cloud data. 
+
+## Data Details
+
+We will use point cloud data collected over the [U.S. Dairy Forage Research Center Far](https://www.ars.usda.gov/ARSUserFiles/50901500/About%20Us%20and%20Contact%20Information/pdfs/farm%20at%20PdS.pdf) by the [3D Elevation Program](https://www.usgs.gov/3d-elevation-program), a program at the USGS that is conducting nationwide LiDAR surveys.
+
+* Repository: [USGS National Map](https://apps.nationalmap.gov/lidar-explorer/#/)
+* Dataset name: The datasets we are using are a subset of the elev3dep project  [WI_8County_2020_A20](https://rockyweb.usgs.gov/vdelivery/Datasets/Staged/Elevation/LPC/Projects/WI_8County_2020_A20/WI_8County_Sauk_2020/browse/)
+ * *Note that the data are available in the tutorial folder*
+
+## Anlysis Steps
+
+* Load in LAS data
+* Exploring the LAS data structure in `lidR`
+  * Attributes
+  * Plotting
+* Larger geographic coverage with the `lasCatalog` in `lidR`
+
+## Step 0: Load Libraries and data
+
+```{r load_libraries}
+library(lidR)
+library(future)
+library(devtools)
+
+# Here is the directory on Atlas
+lasdir <- ""
+
+# look at the contents of the folder:
+list.files(lasdir)
+
+```
+
+## Step 1: Exploring the LAS data structure in `lidR`
+
+Individual lidar point clouds (lasfiles) are loaded using the function `readLAS`. Read in one of the dataset point clouds using `readLAS`:
+
+```{r readLAS}
+
+las <- readLAS()
+
+```
+
+You can plot it in 3D using the `plot` command in `lidR`.
+
+Note that you can specify what attribute to plot using the `color` argument. Try plotting by `Classification`.
+
+```{r plotLAS}
+
+plot(las)
+
+```
+
+## Step 2: Classifying the ground
+
+```{r step2}
+# Put Your code below - be sure to include comments
+```
+
+## References
+
+Guo, Qinghua; Su, Yanjun; Hu, Tianyu; Guan, Hongcan; Jin, Shichao; Zhang, Jing; Zhao, Xiaoxia; Xu, Kexin; Wei, Dengjie; Kelly, Maggi; Coops, Nicholas C. “Lidar Boosts 3D Ecological Observations and Modelings: A Review and Perspective.” IEEE Geoscience and Remote Sensing Magazine, vol. 9, no. 1, IEEE, 2021, pp. 232–57, doi:10.1109/MGRS.2020.3032713.
+
+National Oceanic and Atmospheric Administration (NOAA) Coastal Services Center. 2012. “Lidar 101: An Introduction to Lidar Technology, Data, and Applications.” Revised. Charleston, SC: NOAA Coastal Services Center.
+
+
+
+

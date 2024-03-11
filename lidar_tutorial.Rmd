@@ -53,7 +53,7 @@ lasfiles <- list.files(lasdir, full.names=TRUE)
 
 ```
 
-## Step 1: Exploring the LAS data structure in `lidR`
+### Exploring the LAS data structure in `lidR`
 
 Individual lidar point clouds (lasfiles) are loaded using the function `readLAS`. Read in one of the dataset point clouds using `readLAS`:
 
@@ -63,31 +63,62 @@ las <- readLAS(lasfiles[1])
 
 ```
 
-You can plot it in 3D using the `plot` command in `lidR`.
+If you're using R or Rstudio on a local machine with an X11 server set up, you can plot it in 3D using the `plot` command in `lidR`. Unfortunately, this doesn't seem to work in Rstudio server on Open OnDemand.
 
 Note that you can specify what attribute to plot using the `color` argument. Try plotting by `Classification`.
 
 ```{r plotLAS}
 
+# This won't run on Rstudio Server
 plot(las, color = "Classification")
+
+```
+
+## Step 1: Outlier removal
+
+First we will do some noise removal. We will read in a new tile ignoring the classification information to pretend it hasn't been done yet.
+
+We will try using the isolated voxel filter function (`ivf`). It identifies points points that have very few pixels in their surrounding neighborhood of volumetric pixels ('voxel'). The `res` parameter is the resolution (size) of the voxels defining the neighborhood, and `n` defines threhold number of other points to be considered 'isolated'. 
+
+```{r noise}
+
+las_unclass <- readLAS(lasfiles[1], select="xyzrn")
+
+las_denoise <- classify_noise(las_unclass, algorithm = ivf(res=15, n = 6))
+
+#plot(las_denoise, color = "Classification")
+
+```
+
+If we were able to plot the pointcloud in 3D we would see that the `ivf` function has identified some isolated points above and below the main point cloud, and also identified points that are probably powerlines.
+
+We can compare the histograms of the Z values of the points (elevation) before and after removing noise points. Here we can see the range is much more reasonable.
+
+```{r remove_noise}
+
+# filter out the points that were classified as noise
+las_nonoise <- filter_poi(las_denoise, Classification != LASNOISE)
+
+par(mfrow=c(1,2))
+
+hist(las_unclass$Z, main="All point elevations", xlab="Elevation (ft)")
+hist(las_nonoise$Z, main="Filtered point elevations", xlab="Elevation (ft)")
 
 ```
 
 ## Step 2: Classifying the ground
 
-Now we will try classifying the ground for this lidar tile. We will read in a new tile ignoring the classification information to pretend it hasn't been done yet. We're going to use the ground classification algorithm `pmf`, which stands for 'progressive morphological filter'.
+Now we will try classifying the ground for this lidar tile. We're going to use the ground classification algorithm `pmf`, which stands for 'progressive morphological filter'.
 
 ```{r classify_las}
 
-las_unclass <- readLAS(lasfiles[1], select="xyzrn")
-
 # we need to set up the ground classification parameters
 
-las_gnd <- classify_ground(las_unclass, algorithm = pmf(ws = 5, th = 3))
+las_gnd <- classify_ground(las_nonoise, algorithm = pmf(ws = 15, th = 9))
 
-# view classification results
+# view classification results in 3D:
 
-plot(las_gnd, color = "Classification")
+#plot(las_gnd, color = "Classification")
 
 ```
 
@@ -100,7 +131,7 @@ plot_cross(las_gnd, transect_len = 300)
 
 ```
 
-From the cross section, it looks like we might be classifying some buildings as the ground. We aren't going to worry about this too much for the tutorial but there are ways we could try to address this, like using 
+It looks like the additional parameter iterations help to take care of the buildings.
 
 ```{r pmf2}
 # we will start from the unclassified version of the point cloud again
@@ -108,7 +139,7 @@ From the cross section, it looks like we might be classifying some buildings as 
 ws <- c(9, 24, 60, 120)
 th <- seq(1, 6, length.out = length(ws))
 
-las_pmf2 <- classify_ground(las_unclass, algorithm = pmf(ws=ws, th=th))
+las_pmf2 <- classify_ground(las_denoise, algorithm = pmf(ws=ws, th=th))
 
 plot_cross(las_pmf2, transect_len = 300)
 ```
@@ -123,10 +154,24 @@ There are also several methods of making a DTM in `lidR`. We will use the 'trian
 
 dtm_tin <- rasterize_terrain(las_pmf2, res = 30, algorithm = tin())
 
-plot_dtm3d(dtm_tin, bg = "white") 
+# plot_dtm3d(dtm_tin, bg = "white") 
+
+plot(dtm_tin, col = gray(1:50/50))
 
 ```
 
+Another approach is to use nearest neighbor interpolation with inverse distance weighting:
+
+```{r tin_las}
+
+dtm_idw <- rasterize_terrain(las_pmf2, res = 30, 
+                             algorithm = knnidw(k = 10, p = 2, rmax = 150))
+
+# plot_dtm3d(dtm_idw, bg = "white") 
+
+plot(dtm_idw, col = gray(1:50/50))
+
+```
 
 ## Step 4: Height normalization
 
@@ -141,6 +186,8 @@ nlas <- las_pmf2 - dtm_tin
 It doesn't look very different because the terrain is very flat here. We can plot a histogram of elevation to check that ground points are now zero. We use the `lidR` function `filter_ground` to only select ground points and plot their Z axis:
 
 ```{r ground_z}
+
+par(mfrow=c(1,2))
 
 hist(filter_ground(las_pmf2)$Z, main = "Not normalized", xlab="Elevation")
 

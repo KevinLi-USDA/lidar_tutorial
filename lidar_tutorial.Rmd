@@ -42,12 +42,14 @@ We will use point cloud data collected over the [U.S. Dairy Forage Research Cent
 library(lidR)
 library(future)
 library(devtools)
+library(ggplot2)
+library(tidyverse)
 
 # Here is the directory on Atlas
-lasdir <- ""
+lasdir <- "/Users/kevinli/Documents/Data/lidar/PdS_3dep/"
 
 # look at the contents of the folder:
-list.files(lasdir)
+lasfiles <- list.files(lasdir, full.names=TRUE)
 
 ```
 
@@ -57,7 +59,7 @@ Individual lidar point clouds (lasfiles) are loaded using the function `readLAS`
 
 ```{r readLAS}
 
-las <- readLAS()
+las <- readLAS(lasfiles[1])
 
 ```
 
@@ -67,22 +69,108 @@ Note that you can specify what attribute to plot using the `color` argument. Try
 
 ```{r plotLAS}
 
-plot(las)
+plot(las, color = "Classification")
 
 ```
 
 ## Step 2: Classifying the ground
 
-```{r step2}
-# Put Your code below - be sure to include comments
+Now we will try classifying the ground for this lidar tile. We will read in a new tile ignoring the classification information to pretend it hasn't been done yet. We're going to use the ground classification algorithm `pmf`, which stands for 'progressive morphological filter'.
+
+```{r classify_las}
+
+las_unclass <- readLAS(lasfiles[1], select="xyzrn")
+
+# we need to set up the ground classification parameters
+
+las_gnd <- classify_ground(las_unclass, algorithm = pmf(ws = 5, th = 3))
+
+# view classification results
+
+plot(las_gnd, color = "Classification")
+
+```
+
+To get a better idea of how the classification worked, we can plot a cross section in ggplot. There is a function in `R/plot_cross.r` that can be used for this.
+
+```{r plot_cross}
+source("R/plot_cross.r")
+
+plot_cross(las_gnd, transect_len = 300)
+
+```
+
+From the cross section, it looks like we might be classifying some buildings as the ground. We aren't going to worry about this too much for the tutorial but there are ways we could try to address this, like using 
+
+```{r pmf2}
+# we will start from the unclassified version of the point cloud again
+
+ws <- c(9, 24, 60, 120)
+th <- seq(1, 6, length.out = length(ws))
+
+las_pmf2 <- classify_ground(las_unclass, algorithm = pmf(ws=ws, th=th))
+
+plot_cross(las_pmf2, transect_len = 300)
+```
+
+## Step 3: Create a digital terrain model
+
+With the ground identified, we can use this information to create a digital terrain model (DTM). The DTM has a lot of applications, like for modeling hydrology. In our case, we will use the DTM to normalize the point cloud, which allows us to treat the points as if they were collected above a flat surface. This way, the height of the point in the point cloud corresponds to height above the ground in the real world. This will be helpful for modeling vegetation height.
+
+There are also several methods of making a DTM in `lidR`. We will use the 'triangular irregular network' approach, which is a fast and robust method. It uses the Delauney triangulation method, which is simple and requires no parameters.
+
+```{r tin_las}
+
+dtm_tin <- rasterize_terrain(las_pmf2, res = 30, algorithm = tin())
+
+plot_dtm3d(dtm_tin, bg = "white") 
+
+```
+
+
+## Step 4: Height normalization
+
+Once we have the digital terrain model, we can use it to normalize the heights of the point cloud.
+
+```{r normalization}
+
+nlas <- las_pmf2 - dtm_tin
+
+```
+
+It doesn't look very different because the terrain is very flat here. We can plot a histogram of elevation to check that ground points are now zero. We use the `lidR` function `filter_ground` to only select ground points and plot their Z axis:
+
+```{r ground_z}
+
+hist(filter_ground(las_pmf2)$Z, main = "Not normalized", xlab="Elevation")
+
+hist(filter_ground(nlas)$Z, main = "Normalized", xlab="Elevation")
+
+```
+
+Notice that the ground points are centered at 0 now but they're not all exactly 0. This is because we normalized against the digital terrain model, which generalizes the elevation to the pixel level. The exact elevation at each point within the pixel is likely a little off from the the pixel value.
+
+Another way to normalize the point cloud is to reference the ground points within the point cloud itself. The `normalize_height` function uses a spatial interpolation function to create a continuous surface of ground points to use for normalization rather than the DTM grid. We need to give it an interpolation method, so we use the TIN method again.
+
+```{r point_normalization}
+
+nlas2 <- normalize_height(las_pmf2, tin())
+
+```
+
+If we look at the histogram of ground points from this normalization, we can see they are all at 0.
+
+```{r ground_z_2}
+
+hist(filter_ground(nlas2)$Z, main = "Normalized", xlab="Elevation")
+
 ```
 
 ## References
 
-Guo, Qinghua; Su, Yanjun; Hu, Tianyu; Guan, Hongcan; Jin, Shichao; Zhang, Jing; Zhao, Xiaoxia; Xu, Kexin; Wei, Dengjie; Kelly, Maggi; Coops, Nicholas C. “Lidar Boosts 3D Ecological Observations and Modelings: A Review and Perspective.” IEEE Geoscience and Remote Sensing Magazine, vol. 9, no. 1, IEEE, 2021, pp. 232–57, doi:10.1109/MGRS.2020.3032713.
+Guo, Q., Su, Y., Hu, T., Guan, H., Jin, S., Zhang, J., Zhao, X., Xu, K., Wei, D., Kelly, M., & Coops, N. C. (2021). Lidar Boosts 3D Ecological Observations and Modelings: A Review and Perspective. IEEE Geoscience and Remote Sensing Magazine, 9(1), 232–257. https://doi.org/10.1109/MGRS.2020.3032713
 
-National Oceanic and Atmospheric Administration (NOAA) Coastal Services Center. 2012. “Lidar 101: An Introduction to Lidar Technology, Data, and Applications.” Revised. Charleston, SC: NOAA Coastal Services Center.
-
+Roussel, J.-R., Goodbody, T. R. H., & Tompalski, P. (2023). The lidR package. https://r-lidar.github.io/lidRbook/
 
 
 

@@ -1,0 +1,40 @@
+<VRTDataset rasterXSize="300" rasterYSize="300">
+  <SRS dataAxisToSRSAxisMapping="1,2,3">COMPD_CS["NAD83(2011) / WISCRS Sauk (ftUS) + NAVD88 height - Geoid12B (ftUS)",PROJCS["NAD83(2011) / WISCRS Sauk (ftUS)",GEOGCS["NAD83(2011)",DATUM["NAD83_National_Spatial_Reference_System_2011",SPHEROID["GRS 1980",6378137,298.257222101,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","1116"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","6318"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",42.8194444444445],PARAMETER["central_meridian",-89.9],PARAMETER["scale_factor",1.0000373868],PARAMETER["false_easting",609000.001],PARAMETER["false_northing",0.017],UNIT["US survey foot",0.304800609601219,AUTHORITY["EPSG","9003"]],AXIS["Easting",EAST],AXIS["Northing",NORTH],AUTHORITY["EPSG","7631"]],VERT_CS["NAVD88 height (ftUS)",VERT_DATUM["North American Vertical Datum 1988",2005,AUTHORITY["EPSG","5103"]],UNIT["US survey foot",0.304800609601219,AUTHORITY["EPSG","9003"]],AXIS["Gravity-related height",UP],AUTHORITY["EPSG","6360"]]]</SRS>
+  <GeoTransform>  6.4350000000000000e+05,  3.0000000000000000e+01,  0.0000000000000000e+00,  2.0250000000000000e+05,  0.0000000000000000e+00, -3.0000000000000000e+01</GeoTransform>
+  <VRTRasterBand dataType="Float32" band="1">
+    <NoDataValue>-999999</NoDataValue>
+    <ColorInterp>Gray</ColorInterp>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">USGS_LPC_WI_8County_2020_A20_0875_classified.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="150" RasterYSize="150" DataType="Float32" BlockXSize="150" BlockYSize="13" />
+      <SrcRect xOff="0" yOff="0" xSize="150" ySize="150" />
+      <DstRect xOff="0" yOff="0" xSize="150" ySize="150" />
+      <NODATA>-999999</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">USGS_LPC_WI_8County_2020_A20_0876_classified.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="150" RasterYSize="150" DataType="Float32" BlockXSize="150" BlockYSize="13" />
+      <SrcRect xOff="0" yOff="0" xSize="150" ySize="150" />
+      <DstRect xOff="150" yOff="0" xSize="150" ySize="150" />
+      <NODATA>-999999</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">USGS_LPC_WI_8County_2020_A20_0912_classified.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="150" RasterYSize="150" DataType="Float32" BlockXSize="150" BlockYSize="13" />
+      <SrcRect xOff="0" yOff="0" xSize="150" ySize="150" />
+      <DstRect xOff="0" yOff="150" xSize="150" ySize="150" />
+      <NODATA>-999999</NODATA>
+    </ComplexSource>
+    <ComplexSource>
+      <SourceFilename relativeToVRT="1">USGS_LPC_WI_8County_2020_A20_0913_classified.tif</SourceFilename>
+      <SourceBand>1</SourceBand>
+      <SourceProperties RasterXSize="150" RasterYSize="150" DataType="Float32" BlockXSize="150" BlockYSize="13" />
+      <SrcRect xOff="0" yOff="0" xSize="150" ySize="150" />
+      <DstRect xOff="150" yOff="150" xSize="150" ySize="150" />
+      <NODATA>-999999</NODATA>
+    </ComplexSource>
+  </VRTRasterBand>
+</VRTDataset>

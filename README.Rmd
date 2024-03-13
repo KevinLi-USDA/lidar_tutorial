@@ -11,12 +11,12 @@ knitr::opts_chunk$set(
 )
 ```
 
-# lidar_tutorial
+# Lidar Tutorial
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-This tutorial is an introduction to working with the products of lidar data collection from airborne platforms (e.g., drones) using the statistical software `R`, specifically the library `lidR`.
+This tutorial is an introduction to working with the products of lidar data collection from airborne platforms (e.g., drones) using the statistical software `R`, specifically the library `lidR`. A lot of this information and even more detail can be be found in the [excellent online book on `lidR`](https://r-lidar.github.io/lidRbook/).
 
 *Language:* `R`
 
@@ -26,12 +26,14 @@ This tutorial is an introduction to working with the products of lidar data coll
 |:--|:--|:--|
 | `lidR` | Package to view and process LiDAR point clouds in `R` | https://cran.r-project.org/web/packages/lidR/index.html |
 | `future` | Package to enable parallel processing for more efficient computation | https://cran.r-project.org/web/packages/future/index.html |
+| `tidyverse` | Package for data manipulation and plotting functions | https://www.tidyverse.org/ |
 
 ## Nomenclature
 
 * *lidar:* Light Detection and Ranging, a method of remote sensing using pulsed lasers to measure distances.
+* *pulse:* A discrete "shot" of laser emission from the LiDAR platform that is used to measure distance from the target surface, which in turn are the basis of point cloud data. 
 * *LAS:* A file format for storing the 3D point cloud data collected by LiDAR. A related file format is LAZ, which is the compressed version of LAS.
-* *Pulse:* A discrete "shot" of laser emission from the LiDAR platform that is used to measure distance from the target surface, which in turn are the basis of point cloud data. 
+* *tile:* 
 
 ## Data Details
 
@@ -41,7 +43,7 @@ We will use point cloud data collected over the [U.S. Dairy Forage Research Cent
 * Dataset name: The datasets we are using are a subset of the elev3dep project  [WI_8County_2020_A20](https://rockyweb.usgs.gov/vdelivery/Datasets/Staged/Elevation/LPC/Projects/WI_8County_2020_A20/WI_8County_Sauk_2020/LAZ/)
  * *Note that the data are available in the tutorial folder*
 
-## Anlysis Steps
+## Analysis Steps
 
 * Load in LAS data
 * Exploring the LAS data structure in `lidR`
@@ -54,10 +56,7 @@ We will use point cloud data collected over the [U.S. Dairy Forage Research Cent
 ```{r load_libraries}
 library(lidR)
 library(future)
-library(devtools)
-library(ggplot2)
 library(tidyverse)
-library(rgl)
 
 # Here is the directory on Atlas
 lasdir <- "./data"
@@ -145,7 +144,7 @@ It looks like there are buildings that are being classified as ground. We can tr
 ```{r pmf2}
 # we will start from the unclassified version of the point cloud again
 
-ws <- c(9, 24, 60, 120)
+ws <- c(9, 100)
 th <- seq(1, 6, length.out = length(ws))
 
 las_pmf2 <- classify_ground(las_nonoise, algorithm = pmf(ws=ws, th=th))
@@ -359,6 +358,29 @@ opt_output_files(ctg) <- paste0("./temp/{*}_classified")
 # run your favorite lidR process in parallel on the LAScatalog! e.g., classify ground
 
 ctg_chm <- rasterize_terrain(ctg, res = 30, algorithm = tin(), overwrite=TRUE)
+
+```
+
+At the same time, some functions in `lidR` also have built-in parallel capabilities. You can check this by running `is.parallelised` on the function. If a function is parallelized, you can set the number of threads to use with `set_lidr_threads` if the machine has OpenMP support (which the Atlas does). But keep in mind that you have to balance these threads with chunk parallelization if you're running them at the same time. So if a process is using two threads, but is processing two chunks in parallel, then a total of four threads are needed.
+
+```{r check_threads, eval=FALSE}
+
+# Check if tin function is parallelized:
+is.parallelised(tin())
+
+# How many threads is lidR using?
+get_lidr_threads()
+
+# Change how many threads lidR is using (Only works with OpenMP support)
+set_lidr_threads(2)
+
+# check how many workers are reserved for `future`
+# (you set up future workers earlier with `plan(multisession, workers=2))`
+
+future::nbrOfFreeWorkers()
+
+# do you have enough cores?
+availableCores() >= nbrOfFreeWorkers()*get_lidr_threads()
 
 ```
 

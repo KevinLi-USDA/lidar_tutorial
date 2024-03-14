@@ -33,7 +33,6 @@ This tutorial is an introduction to working with the products of lidar data coll
 * *lidar:* Light Detection and Ranging, a method of remote sensing using pulsed lasers to measure distances.
 * *pulse:* A discrete "shot" of laser emission from the LiDAR platform that is used to measure distance from the target surface, which in turn are the basis of point cloud data. 
 * *LAS:* A file format for storing the 3D point cloud data collected by LiDAR. A related file format is LAZ, which is the compressed version of LAS.
-* *tile:* 
 
 ## Data Details
 
@@ -329,12 +328,12 @@ opt_chunk_buffer(ctg)
 
 ```
 
-Processing LAScatalogs is similar to LAS in `lidR` except they sometimes need an extra step of defining an output file template. This could be a temporary file, like so:
+Processing LAScatalogs is similar to LAS in `lidR` except the output needs to be written to files on disk. The output file template has to be specified in the LAScatalog:
 
 ```{r define_output}
 dir.create("./temp")
 
-opt_output_files(ctg) <- paste0("./temp/{*}_chm")
+opt_output_files(ctg) <- paste0(tempdir(), "{*}_chm")
 
 # now you can run one of the above processes, like classify canopy:
 
@@ -355,9 +354,9 @@ plan(multisession, workers=2)
 
 opt_output_files(ctg) <- paste0("./temp/{*}_classified")
 
-# run your favorite lidR process in parallel on the LAScatalog! e.g., classify ground
+# run your favorite lidR process in parallel on the LAScatalog! e.g., make a dtm
 
-ctg_chm <- rasterize_terrain(ctg, res = 30, algorithm = tin(), overwrite=TRUE)
+ctg_dtm <- rasterize_terrain(ctg, res = 30, algorithm = tin(), overwrite=TRUE)
 
 ```
 

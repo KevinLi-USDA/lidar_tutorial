@@ -32,7 +32,6 @@ online book on `lidR`](https://r-lidar.github.io/lidRbook/).
 - *LAS:* A file format for storing the 3D point cloud data collected by
   LiDAR. A related file format is LAZ, which is the compressed version
   of LAS.
-- *tile:*
 
 ## Data Details
 
@@ -209,7 +208,7 @@ requires no parameters.
 
 ``` r
 dtm_tin <- rasterize_terrain(las_pmf2, res = 30, algorithm = tin())
-#> Delaunay rasterization[======================================------------] 77% (1 threads)Delaunay rasterization[=======================================-----------] 78% (1 threads)Delaunay rasterization[=======================================-----------] 79% (1 threads)Delaunay rasterization[========================================----------] 80% (1 threads)Delaunay rasterization[========================================----------] 81% (1 threads)Delaunay rasterization[=========================================---------] 82% (1 threads)Delaunay rasterization[=========================================---------] 83% (1 threads)Delaunay rasterization[==========================================--------] 84% (1 threads)Delaunay rasterization[==========================================--------] 85% (1 threads)Delaunay rasterization[===========================================-------] 86% (1 threads)Delaunay rasterization[===========================================-------] 87% (1 threads)Delaunay rasterization[============================================------] 88% (1 threads)Delaunay rasterization[============================================------] 89% (1 threads)Delaunay rasterization[=============================================-----] 90% (1 threads)Delaunay rasterization[=============================================-----] 91% (1 threads)Delaunay rasterization[==============================================----] 92% (1 threads)Delaunay rasterization[==============================================----] 93% (1 threads)Delaunay rasterization[===============================================---] 94% (1 threads)Delaunay rasterization[===============================================---] 95% (1 threads)Delaunay rasterization[================================================--] 96% (1 threads)Delaunay rasterization[================================================--] 97% (1 threads)Delaunay rasterization[=================================================-] 98% (1 threads)Delaunay rasterization[=================================================-] 99% (1 threads)Delaunay rasterization[==================================================] 100% (1 threads)
+#> Delaunay rasterization[========================================----------] 80% (1 threads)Delaunay rasterization[========================================----------] 81% (1 threads)Delaunay rasterization[=========================================---------] 82% (1 threads)Delaunay rasterization[=========================================---------] 83% (1 threads)Delaunay rasterization[==========================================--------] 84% (1 threads)Delaunay rasterization[==========================================--------] 85% (1 threads)Delaunay rasterization[===========================================-------] 86% (1 threads)Delaunay rasterization[===========================================-------] 87% (1 threads)Delaunay rasterization[============================================------] 88% (1 threads)Delaunay rasterization[============================================------] 89% (1 threads)Delaunay rasterization[=============================================-----] 90% (1 threads)Delaunay rasterization[=============================================-----] 91% (1 threads)Delaunay rasterization[==============================================----] 92% (1 threads)Delaunay rasterization[==============================================----] 93% (1 threads)Delaunay rasterization[===============================================---] 94% (1 threads)Delaunay rasterization[===============================================---] 95% (1 threads)Delaunay rasterization[================================================--] 96% (1 threads)Delaunay rasterization[================================================--] 97% (1 threads)Delaunay rasterization[=================================================-] 98% (1 threads)Delaunay rasterization[=================================================-] 99% (1 threads)Delaunay rasterization[==================================================] 100% (1 threads)
 
 # plot_dtm3d(dtm_tin, bg = "white") 
 
@@ -441,14 +440,14 @@ opt_chunk_buffer(ctg)
 # opt_chunk_buffer(ctg) <- 30 # 100 ft buffer
 ```
 
-Processing LAScatalogs is similar to LAS in `lidR` except they sometimes
-need an extra step of defining an output file template. This could be a
-temporary file, like so:
+Processing LAScatalogs is similar to LAS in `lidR` except the output
+needs to be written to files on disk. The output file template has to be
+specified in the LAScatalog:
 
 ``` r
 dir.create("./temp")
 
-opt_output_files(ctg) <- paste0("./temp/{*}_chm")
+opt_output_files(ctg) <- paste0(tempdir(), "{*}_chm")
 
 # now you can run one of the above processes, like classify canopy:
 
@@ -483,9 +482,9 @@ plan(multisession, workers=2)
 
 opt_output_files(ctg) <- paste0("./temp/{*}_classified")
 
-# run your favorite lidR process in parallel on the LAScatalog! e.g., classify ground
+# run your favorite lidR process in parallel on the LAScatalog! e.g., make a dtm
 
-ctg_chm <- rasterize_terrain(ctg, res = 30, algorithm = tin(), overwrite=TRUE)
+ctg_dtm <- rasterize_terrain(ctg, res = 30, algorithm = tin(), overwrite=TRUE)
 ```
 
 ![](README_files/figure-gfm/chunk_future-1.png)<!-- -->

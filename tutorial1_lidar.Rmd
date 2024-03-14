@@ -4,6 +4,8 @@ output: html_document
 date: "2024-03-14"
 ---
 
+This is the tutorial Rmarkdown workbook for running on Atlas. If you want to download the data and code and look at the fully-run outputs, these are available on a GitHub repository: https://github.com/KevinLi-USDA/lidar_tutorial
+
 ## Analysis Steps
 
 * Load in LAS data
@@ -290,7 +292,7 @@ opt_chunk_buffer(ctg)
 
 ```
 
-Processing LAScatalogs is similar to LAS in `lidR` except they sometimes need an extra step of defining an output file template. This could be a temporary file, like so:
+Processing LAScatalogs is similar to LAS in `lidR` except the output needs to be written to files on disk. The output file template has to be specified in the LAScatalog:
 
 ```{r define_output}
 dir.create("./temp")

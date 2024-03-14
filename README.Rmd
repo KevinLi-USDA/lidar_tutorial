@@ -129,10 +129,10 @@ las_gnd <- classify_ground(las_nonoise, algorithm = pmf(ws = 15, th = 9))
 
 ```
 
-To get a better idea of how the classification worked, we can plot a cross section in ggplot. There is a function in `R/plot_cross.r` that can be used for this.
+To get a better idea of how the classification worked, we can plot a cross section in ggplot. There is a function in `R/plot_cross.R` that can be used for this.
 
 ```{r plot_cross}
-source("R/plot_cross.r")
+source("R/plot_cross.R")
 
 plot_cross(las_gnd, transect_len = 300)
 

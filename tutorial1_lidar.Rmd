@@ -17,7 +17,7 @@ This is the tutorial Rmarkdown workbook for running on Atlas. If you want to dow
 ## Step 0: Load Libraries and data
 
 ```{r load_libraries}
-library(lidR, lib.loc = "/90daydata/shared/Rlib")
+library(lidR)
 library(future)
 library(tidyverse)
 

@@ -99,7 +99,7 @@ las_denoise <- classify_noise(las_unclass, algorithm = ivf(res=15, n = 6))
 
 ```
 
-If we were able to plot the pointcloud in 3D we would see that the `ivf` function has identified some isolated points above and below the main point cloud, and also identified points that are probably powerlines.
+If we were able to plot the point cloud in 3D we would see that the `ivf` function has identified some isolated points above and below the main point cloud, and also identified points that are probably powerlines.
 
 We can compare the histograms of the Z values of the points (elevation) before and after removing noise points. Here we can see the range is much more reasonable.
 
@@ -331,9 +331,11 @@ opt_chunk_buffer(ctg)
 Processing LAScatalogs is similar to LAS in `lidR` except the output needs to be written to files on disk. The output file template has to be specified in the LAScatalog:
 
 ```{r define_output}
-dir.create("./temp")
+temp.path <- tempdir()
 
-opt_output_files(ctg) <- paste0(tempdir(), "{*}_chm")
+dir.create(temp.path)
+
+opt_output_files(ctg) <- paste0(temp.path, "/{*}_chm")
 
 # now you can run one of the above processes, like classify canopy:
 
@@ -352,7 +354,7 @@ plan(multisession, workers=2)
 
 # set up file template again
 
-opt_output_files(ctg) <- paste0("./temp/{*}_classified")
+opt_output_files(ctg) <- paste0(temp.path, "/{*}_classified")
 
 # run your favorite lidR process in parallel on the LAScatalog! e.g., make a dtm
 
@@ -371,7 +373,7 @@ is.parallelised(tin())
 get_lidr_threads()
 
 # Change how many threads lidR is using (Only works with OpenMP support)
-set_lidr_threads(2)
+set_lidr_threads(1)
 
 # check how many workers are reserved for `future`
 # (you set up future workers earlier with `plan(multisession, workers=2))`

@@ -56,7 +56,7 @@ plot_cross <- function(las,
     geom_point(size = 0.5) +
     coord_equal() + theme_minimal() +
     scale_color_manual(values = cols) +
-    theme(legend.position = c(0.9,0.9))
+    theme(legend.position.inside = c(0.9,0.9))
 
   if(!is.null(title)){
     p <- p + ggtitle(title)

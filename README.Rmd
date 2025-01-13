@@ -358,11 +358,11 @@ opt_output_files(ctg) <- paste0(temp.path, "/{*}_classified")
 
 # run your favorite lidR process in parallel on the LAScatalog! e.g., make a dtm
 
-ctg_dtm <- rasterize_terrain(ctg, res = 30, algorithm = tin(), overwrite=TRUE)
+# ctg_dtm <- rasterize_terrain(ctg, res = 30, algorithm = tin(), overwrite=TRUE)
 
 ```
 
-At the same time, some functions in `lidR` also have built-in parallel capabilities. You can check this by running `is.parallelised` on the function. If a function is parallelized, you can set the number of threads to use with `set_lidr_threads` if the machine has OpenMP support (which the Atlas does). But keep in mind that you have to balance these threads with chunk parallelization if you're running them at the same time. So if a process is using two threads, but is processing two chunks in parallel, then a total of four threads are needed.
+At the same time, some functions in `lidR` also have built-in parallel capabilities. You can check this by running `is.parallelised` on the function. If a function is parallelized, you can set the number of threads to use with `set_lidr_threads` if the machine has OpenMP support (which Atlas does). But keep in mind that you have to balance these threads with chunk parallelization if you're running them at the same time. So if a process is using two threads, but is processing two chunks in parallel, then a total of four threads are needed.
 
 ```{r check_threads, eval=FALSE}
 
